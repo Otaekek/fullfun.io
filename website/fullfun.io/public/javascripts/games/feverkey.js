@@ -137,6 +137,7 @@ function init() {
             create_ball(event.keyCode);
         }
     });
+    get_file("/games/feverkey/letters/PNG-Blue-letter_A.png", receiveTextureFromServer)
 }
 
 
@@ -193,6 +194,19 @@ function update_particle(ball, i)
     }
 }
 
+function receiveTextureFromServer(file)
+{
+    alert(file);
+}
+
+function get_file(fileName, onFinishFunc)
+{
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', "fileName", true);
+    xhr.send();
+    xhr.addEventListener("readystatechange", onFinishFunc, false);
+}
+
 function dist2d(m1, m2)
 {
     return (Math.sqrt((m1.position.x - m2.position.x) * (m1.position.x - m2.position.x) + (m1.position.y - m2.position.y) * (m1.position.y - m2.position.y)));
@@ -202,15 +216,16 @@ function update_ball(ball, i)
 {
     ball.speedx += ball.accelx;
     ball.speedy += ball.accely;
-    notes.forEach(function (note, j){
-    if (dist2d(ball, note) < 30)
+    notes.forEach(function (note, j)
     {
-        create_particle(0, 6, ball);
-        //balls.splice(i, 1);
-        scene.remove(ball);
-        notes.splice(j, 1);
-        scene.remove(note);
-    }
+        if (dist2d(ball, note) < 30)
+        {
+            create_particle(0, 6, ball);
+            //balls.splice(i, 1);
+            scene.remove(ball);
+            notes.splice(j, 1);
+            scene.remove(note);
+        }
     }, this);
     ball.position.x += ball.speedx;
     ball.position.y += ball.speedy;
