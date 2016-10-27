@@ -17,6 +17,7 @@ var letters = [];
     var ballsize;
     var notesize;
     var count = 0;
+    var xhr;
 init();
 animate();
 
@@ -86,9 +87,12 @@ function init() {
     var i = 0;
     while (i < 26)
     {
-        material = new THREE.MeshPhongMaterial( { color: Math.random() * 20000000, specular: 0x555555, shininess: 30 } );
+        var c = i + 65;
+        material = new THREE.MeshPhongMaterial( {color: Math.random() * 20000000, specular: 0x555555, shininess: 30 } );
         geometry = new THREE.SphereGeometry(10, 32, 10 );
+       // material.map = THREE.ImageUtils.loadTexture('/games/feverkey/letters/PNG-Blue-letter_A.png');
         mesh = new THREE.Mesh(geometry, material);
+      //  scene.add(mesh);
         mesh.position.x = -height  / 2 + width * (i) / 48;
         mesh.position.z = 500;
         mesh.rotation.x = 0;
@@ -100,8 +104,9 @@ function init() {
     i = 0;
     while (i < 26)
     {
-        material = new THREE.MeshPhongMaterial( { color: Math.random() * 20000000, specular: 0xFFFFFF, shininess: 30 } );
-        geometry = new THREE.BoxGeometry(20, 20, 20);
+        var c = i + 65;
+        material = new THREE.MeshPhongMaterial( { map: THREE.ImageUtils.loadTexture('/games/feverkey/letters/PNG-Wood-letter_' + String.fromCharCode(c) + '.png'), specular: 0, shininess: 30 } );
+        geometry = new THREE.BoxGeometry(30, 30, 30);
         mesh = new THREE.Mesh(geometry, material);
         mesh.position.z = 500;
         mesh.rotation.x = 0;
@@ -137,7 +142,6 @@ function init() {
             create_ball(event.keyCode);
         }
     });
-    get_file("/games/feverkey/letters/PNG-Blue-letter_A.png", receiveTextureFromServer)
 }
 
 
@@ -196,15 +200,16 @@ function update_particle(ball, i)
 
 function receiveTextureFromServer(file)
 {
-    alert(file);
+    alert(xhr.readyState);
 }
 
 function get_file(fileName, onFinishFunc)
 {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', "fileName", true);
+    xhr.open('GET', fileName, false);
     xhr.send();
-    xhr.addEventListener("readystatechange", onFinishFunc, false);
+    //xhr.addEventListener("readystatechange", onFinishFunc, false);
+    alert(xhr.responseText);
 }
 
 function dist2d(m1, m2)
@@ -229,12 +234,17 @@ function update_ball(ball, i)
     }, this);
     ball.position.x += ball.speedx;
     ball.position.y += ball.speedy;
+    ball.rotation.x += 0.05;
+    ball.rotation.y += 0.05;
 }
 function create_notes()
 {
+    var c = Math.floor(Math.random() * 27);
+   // c = 2;
+ //   c = c.toInt(); 
     if (Math.random() * 1000 < 50)
     {
-        var b = new THREE.Mesh(squareLetters[0].geometry.clone(), squareLetters[0].material.clone());
+        var b = new THREE.Mesh(squareLetters[c].geometry.clone(), squareLetters[c].material.clone());
         b.position.x = width / 2;
         b.position.z = 500;
         b.speedx = -5;
