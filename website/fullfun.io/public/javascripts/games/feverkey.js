@@ -11,6 +11,11 @@ var letters = [];
     var width = 800;
     var height = 600;
     var balls = [];
+    var squareLetters = [];
+    var particle = [];
+    var notes = [];
+    var ballsize;
+    var notesize;
     var count = 0;
 init();
 animate();
@@ -76,14 +81,13 @@ var qwertyKeyMap  ={
 function init() {
     camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2,1 , 1000 );
     camera.position.z = 1000;
-
+    camera.aspect = 10;
     scene = new THREE.Scene();
-
     var i = 0;
     while (i < 26)
     {
         material = new THREE.MeshPhongMaterial( { color: Math.random() * 20000000, specular: 0x555555, shininess: 30 } );
-        geometry = new THREE.SphereGeometry(20, 32, 10 );
+        geometry = new THREE.SphereGeometry(10, 32, 10 );
         mesh = new THREE.Mesh(geometry, material);
         mesh.position.x = -height  / 2 + width * (i) / 48;
         mesh.position.z = 500;
@@ -93,15 +97,29 @@ function init() {
         letters[i] = mesh;
         i++;
     }
+    i = 0;
+    while (i < 26)
+    {
+        material = new THREE.MeshPhongMaterial( { color: Math.random() * 20000000, specular: 0xFFFFFF, shininess: 30 } );
+        geometry = new THREE.BoxGeometry(20, 20, 20);
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.position.z = 500;
+        mesh.rotation.x = 0;
+        mesh.rotation.y = 0;
+        mesh.rotation.z = 0;
+        squareLetters[i] = mesh;
+        i++;
+    }
     renderer = new THREE.WebGLRenderer();
-    renderer.setSize(width, height);
+   // renderer.setSize(Window.innerWidth / 2, Window.innerWidht / 2 / 1.6);
+    
     renderer.shadowMapEnabled = true;
 
-    var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    var dirLight = new THREE.DirectionalLight(0xfff000, 1);
     dirLight.position.set(-width / 2, 0, 600);
-    //scene.add(dirLight);
+    scene.add(dirLight);
 
-    dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight = new THREE.DirectionalLight(0xfff, 1);
     dirLight.position.set(width / 2, 0, 600);
     dirLight.castShadow = true;
     scene.add(dirLight);
@@ -121,6 +139,32 @@ function init() {
     });
 }
 
+
+function create_particle(side, n, ball)
+{
+    var i = 0;
+    while (i < n)
+    {
+        var b = new THREE.Mesh(ball.geometry.clone(), ball.material.clone());
+        b.position.x = ball.position.x;
+        b.position.y = ball.position.y;
+       /* if (side == 0)
+            b.material.color.setHex(0);
+        else
+            b.material.color.setHex(0x0000FF);*/
+        b.scale.x /= n;
+        b.scale.y /= n;
+        b.scale.z /= n;
+        b.speedx = (Math.random() - 0.5) * 10;
+        b.speedy = 5;
+        b.accelx = (Math.random() - 0.5) / 800;
+        b.accely = (Math.random()) / -4;
+        particle.push(b);
+        scene.add(b);
+        i++;
+    }
+}
+
 function create_ball(character)
 {
     var b = new THREE.Mesh(letters[character- 65].geometry.clone(), letters[character - 65].material.clone());
@@ -131,28 +175,87 @@ function create_ball(character)
     b.accelx = 0;
     b.accely = 0.2;
     b.position.y = -height / 2;
+    b.burst = 0;
     balls.push(b);
     scene.add(b);
 }
 
-function update_ball(ball)
+function update_particle(ball, i)
 {
     ball.speedx += ball.accelx;
     ball.speedy += ball.accely;
     ball.position.x += ball.speedx;
     ball.position.y += ball.speedy;
+    if (ball.position.y < -height)
+    {
+        particle.splice(i, 1);
+        scene.remove(ball);
+    }
 }
 
-function update_balls()
+function dist2d(m1, m2)
 {
-    balls.forEach(update_ball);
+    return (Math.sqrt((m1.position.x - m2.position.x) * (m1.position.x - m2.position.x) + (m1.position.y - m2.position.y) * (m1.position.y - m2.position.y)));
 }
 
+function update_ball(ball, i)
+{
+    ball.speedx += ball.accelx;
+    ball.speedy += ball.accely;
+    notes.forEach(function (note, j){
+    if (dist2d(ball, note) < 30)
+    {
+        create_particle(0, 6, ball);
+        //balls.splice(i, 1);
+        scene.remove(ball);
+        notes.splice(j, 1);
+        scene.remove(note);
+    }
+    }, this);
+    ball.position.x += ball.speedx;
+    ball.position.y += ball.speedy;
+}
+function create_notes()
+{
+    if (Math.random() * 1000 < 50)
+    {
+        var b = new THREE.Mesh(squareLetters[0].geometry.clone(), squareLetters[0].material.clone());
+        b.position.x = width / 2;
+        b.position.z = 500;
+        b.speedx = -5;
+        b.speedy = 0;
+        b.accelx = 0;
+        b.accely = 0;
+        b.position.y = height / 3;
+        notes.push(b);
+        scene.add(b);
+    }
+}
 
+function update_note(note, i)
+{
+    note.speedx += note.accelx;
+    note.speedy += note.accely;
+    note.position.x += note.speedx;
+    note.position.y += note.speedy;
+    note.rotation.y += 0.05;
+    note.rotation.x += 0.05;
+}
 
-function animate() {
-
+function animate() 
+{
+    renderer.setSize( window.innerWidth / 1.5 , window.innerWidth / 1.5 / 1.6);
     requestAnimationFrame(animate);
-    update_balls();
+    create_notes();
+    balls.forEach(update_ball);
+    particle.forEach(update_particle);
+    notes.forEach(update_note);
     renderer.render(scene, camera);
 }
+
+
+
+
+
+
+
