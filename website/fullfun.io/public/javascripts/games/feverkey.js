@@ -18,6 +18,8 @@ var letters = [];
     var notesize;
     var count = 0;
     var xhr;
+    var sound = [];
+
 init();
 animate();
 
@@ -145,6 +147,17 @@ function init() {
 }
 
 
+function init_sound()
+{
+
+}
+
+function play_sound(note, duration)
+{
+    MIDI.noteOn(0, note, 100, 0);
+    MIDI.noteOff(0, note, duration);
+}
+
 function create_particle(side, n, ball)
 {
     var i = 0;
@@ -225,6 +238,7 @@ function update_ball(ball, i)
     {
         if (dist2d(ball, note) < 30)
         {
+            play_sound(note.note, 0.75);
             create_particle(0, 6, ball);
             //balls.splice(i, 1);
             scene.remove(ball);
@@ -239,18 +253,19 @@ function update_ball(ball, i)
 }
 function create_notes()
 {
-    var c = Math.floor(Math.random() * 27);
+    var c = Math.floor(Math.random() * 26);
    // c = 2;
  //   c = c.toInt(); 
-    if (Math.random() * 1000 < 50)
+    if (Math.random() * 1000 < 20)
     {
         var b = new THREE.Mesh(squareLetters[c].geometry.clone(), squareLetters[c].material.clone());
         b.position.x = width / 2;
         b.position.z = 500;
-        b.speedx = -5;
+        b.speedx = -2;
         b.speedy = 0;
         b.accelx = 0;
         b.accely = 0;
+        b.note = 20 + Math.floor(Math.random() * 100);
         b.position.y = height / 3;
         notes.push(b);
         scene.add(b);

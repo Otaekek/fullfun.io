@@ -1,5 +1,46 @@
 <% include ../layout.html %>
 <body class="feverkey">
 </body>
+<script src="https://code.createjs.com/soundjs-0.6.2.min.js"></script>
 <script src="/javascripts/three.js"></script>
+
+<script src="/javascripts/inc/shim/Base64.js"></script>
+<script src="/javascripts/inc/shim/Base64binary.js"></script>
+<script src="/javascripts/inc/shim/WebAudioAPI.js"></script>
+<script src="/javascripts/inc/shim/WebMIDIAPI.js"></script>
+
+<script src="/javascripts/midi/audioDetect.js"></script>
+<script src="/javascripts/midi/gm.js"></script>
+<script src="/javascripts/midi/loader.js"></script>
+<script src="/javascripts/midi/player.js"></script>
+<script src="/javascripts/midi/plugin.audiotag.js"></script>
+<script src="/javascripts/midi/plugin.webaudio.js"></script>
+<script src="/javascripts/midi/plugin.webmidi.js"></script>
+<script src="/javascripts/midi/synesthesia.js"></script>
+
+<script src="/javascripts/util/dom_request_script.js"></script>
+<script src="/javascripts/util/dom_request_xhr.js"></script>
+
+
 <script src="/javascripts/games/feverkey.js"></script>
+
+<script type="text/javascript">
+window.onload = function () {
+	MIDI.loadPlugin({
+		soundfontUrl: "/javascripts/games/soundfont/",
+		instrument: "acoustic_grand_piano",
+		onprogress: function(state, progress) {
+			console.log(state, progress);
+		},
+		onsuccess: function() {
+			var delay = 0; // play one note every quarter second
+			var note = 50; // the MIDI note
+			var velocity = 127; // how hard the note hits
+			// play the note
+			MIDI.setVolume(0, 127);
+			//MIDI.noteOn(0, note, velocity, delay);
+			//MIDI.noteOff(0, note, delay + 0.75);
+		}
+	});
+};
+</script>
