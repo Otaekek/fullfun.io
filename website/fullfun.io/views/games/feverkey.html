@@ -17,15 +17,13 @@
 <script src="/javascripts/midi/plugin.webaudio.js"></script>
 <script src="/javascripts/midi/plugin.webmidi.js"></script>
 <script src="/javascripts/midi/synesthesia.js"></script>
-
 <script src="/javascripts/util/dom_request_script.js"></script>
 <script src="/javascripts/util/dom_request_xhr.js"></script>
-
-
-<script src="/javascripts/games/feverkey.js"></script>
-
 <script type="text/javascript">
-window.onload = function () {
+	var eventList = [];
+	var eventListIndex = 0;
+
+	window.onload = function () {
 	MIDI.loadPlugin({
 		soundfontUrl: "/javascripts/games/soundfont/",
 		instrument: "acoustic_grand_piano",
@@ -42,5 +40,13 @@ window.onload = function () {
 			//MIDI.noteOff(0, note, delay + 0.75);
 		}
 	});
-};
+	};
 </script>
+
+<script src="/javascripts/midi/audio.js"></script>
+<script src="/javascripts/midi/stream.js"></script>
+<script src="/javascripts/midi/midifile.js"></script>
+<script src="/javascripts/midi/synth.js"></script>
+<script src="/javascripts/midi/replayer.js"></script>
+
+<script src="/javascripts/games/feverkey.js"></script>

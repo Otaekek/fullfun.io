@@ -19,9 +19,9 @@ var letters = [];
     var count = 0;
     var xhr;
     var sound = [];
-
-init();
-animate();
+	var nextEventId = 0;
+	var d= new Date();
+	var T = 0;
 
 var azertyKeyMap  ={
     65: 0,
@@ -81,12 +81,46 @@ var qwertyKeyMap  ={
     77: 13
 };
 
+var midiFile;
+
+init();
+animate();
+
+function loadRemote(path, callback) {
+	var fetch = new XMLHttpRequest();
+	fetch.open('GET', path);
+	fetch.overrideMimeType("text/plain; charset=x-user-defined");
+	fetch.onreadystatechange = function() {
+	if(this.readyState == 4 && this.status == 200) {
+		var t = this.responseText || "" ;
+		var ff = [];
+		var mx = t.length;
+		var scc= String.fromCharCode;
+		for (var z = 0; z < mx; z++) {
+			ff[z] = scc(t.charCodeAt(z) & 255);
+		}
+		callback(ff.join(""));
+		}
+	}
+	fetch.send();
+}
+
+function play(file) {
+	loadRemote(file, function(data) {
+	midiFile = MidiFile(data);
+	var replayer = Replayer(midiFile);
+	console.log(replayer);
+	replayer.generate(10000);
+	})
+}
+
 function init() {
     camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2,1 , 1000 );
     camera.position.z = 1000;
     camera.aspect = 10;
     scene = new THREE.Scene();
     var i = 0;
+	play("/games/feverkey/tracks/adele_-_Hello.mid");
     while (i < 26)
     {
         var c = i + 65;
@@ -186,7 +220,7 @@ function create_particle(side, n, ball)
 function create_ball(character)
 {
     var b = new THREE.Mesh(letters[character- 65].geometry.clone(), letters[character - 65].material.clone());
-    b.position.x = (azertyKeyMap[character] * (width) / 15) - width / 2 + width / 20;
+    b.position.x = (qwertyKeyMap[character] * (width) / 15) - width / 2 + width / 20;
     //b.material.color.setHex(Math.random() * 20000000);
     b.speedx = 0;
     b.speedy = 10;
@@ -254,21 +288,25 @@ function update_ball(ball, i)
 function create_notes()
 {
     var c = Math.floor(Math.random() * 26);
-   // c = 2;
- //   c = c.toInt(); 
-    if (Math.random() * 1000 < 20)
+ 	d = new Date();
+   console.log(d.getTime());	
+	if (d.getTime() - T > 600)
     {
+		T = d.getTime();
         var b = new THREE.Mesh(squareLetters[c].geometry.clone(), squareLetters[c].material.clone());
         b.position.x = width / 2;
         b.position.z = 500;
-        b.speedx = -2;
-        b.speedy = 0;
+        b.speedx = 0;
+        b.speedy = -3;
         b.accelx = 0;
         b.accely = 0;
-        b.note = 20 + Math.floor(Math.random() * 100);
-        b.position.y = height / 3;
-        notes.push(b);
+        b.note = eventList[nextEventId].noteNumber;
+        b.position.y = height / 2;
+		b.position.x = qwertyKeyMap[65 + c] * width / 15 - width / 2 + width / 20;
+		console.log(b.position.x);
+		notes.push(b);
         scene.add(b);
+		nextEventId++;
     }
 }
 
