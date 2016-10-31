@@ -4,6 +4,7 @@ var camera, scene, renderer;
 var geometry, material, mesh;
 var keyMap;
 var letters = [];
+var fever = 1;
     var accel = [];
     var accel2 = [];
     var s1 = [];
@@ -18,6 +19,7 @@ var letters = [];
     var notesize;
     var count = 0;
     var xhr;
+    var lessy;
     var sound = [];
 	var nextEventId = 0;
 	var d= new Date();
@@ -120,7 +122,7 @@ function init() {
     camera.aspect = 10;
     scene = new THREE.Scene();
     var i = 0;
-	play("/games/feverkey/tracks/adele_-_Hello.mid");
+	play("/games/feverkey/tracks/all_of_me.mid");
     while (i < 26)
     {
         var c = i + 65;
@@ -270,27 +272,36 @@ function update_ball(ball, i)
     ball.speedy += ball.accely;
     notes.forEach(function (note, j)
     {
-        if (dist2d(ball, note) < 30)
+        if (j == lessy)
         {
-            play_sound(note.note, 0.75);
-            create_particle(0, 6, ball);
-            //balls.splice(i, 1);
-            scene.remove(ball);
-            notes.splice(j, 1);
-            scene.remove(note);
-        }
+            if (dist2d(ball, note) < 30)
+            {
+                play_sound(note.note, 0.75);
+                create_particle(0, 6, ball);
+                balls.splice(i, 1);
+                scene.remove(ball);
+                notes.splice(j, 1);
+                fever += 0.1;
+                if (lessy > j)
+                    lessy--;
+                scene.remove(note);
+            }
+        }  
     }, this);
     ball.position.x += ball.speedx;
     ball.position.y += ball.speedy;
     ball.rotation.x += 0.05;
     ball.rotation.y += 0.05;
 }
+
 function create_notes()
 {
     var c = Math.floor(Math.random() * 26);
+    c = Math.floor((eventList[nextEventId].noteNumber / (107 - 24)) * 25);
+    if (c >= 26)
+        c = 25;
  	d = new Date();
-   console.log(d.getTime());	
-	if (d.getTime() - T > 600)
+	if (d.getTime() - T > eventListTime[nextEventId] * 12)
     {
 		T = d.getTime();
         var b = new THREE.Mesh(squareLetters[c].geometry.clone(), squareLetters[c].material.clone());
@@ -303,7 +314,6 @@ function create_notes()
         b.note = eventList[nextEventId].noteNumber;
         b.position.y = height / 2;
 		b.position.x = qwertyKeyMap[65 + c] * width / 15 - width / 2 + width / 20;
-		console.log(b.position.x);
 		notes.push(b);
         scene.add(b);
 		nextEventId++;
@@ -318,16 +328,33 @@ function update_note(note, i)
     note.position.y += note.speedy;
     note.rotation.y += 0.05;
     note.rotation.x += 0.05;
+    note.material.transparent = true;
+    note.material.opacity = 0.3;
+    if (note.position.y < -height / 2)
+    {
+        fever -= 0.3;
+        notes.splice(i, 1);
+        scene.remove(note);
+        if (lessy > i)
+            lessy--;
+    }
+    else if (notes[lessy] < note.position.y)
+        lessy = i;
+
 }
 
 function animate() 
 {
+    lessy = 0;
     renderer.setSize( window.innerWidth / 1.5 , window.innerWidth / 1.5 / 1.6);
     requestAnimationFrame(animate);
     create_notes();
-    balls.forEach(update_ball);
+  balls.forEach(update_ball);
     particle.forEach(update_particle);
     notes.forEach(update_note);
+  
+    if (notes[lessy])
+    notes[lessy].material.transparent = false;
     renderer.render(scene, camera);
 }
 

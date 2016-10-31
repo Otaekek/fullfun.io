@@ -136,13 +136,14 @@ function Replayer(midiFile, synth) {
 			case 'meta':
 				switch (event.subtype) {
 					case 'setTempo':
-						beatsPerMinute = 60000000 / event.microsecondsPerBeat
+						beatsPerMinute = 60000000 / event.microsecondsPerBeat;
 				}
 				break;
 			case 'channel':
 				switch (event.subtype) {
 					case 'noteOn':
 						//console.log(event);
+						eventListTime[eventListIndex] = beatsPerMinute;
 						eventList[eventListIndex] = event;
 						eventListIndex++;
 						//alert("mdr");
